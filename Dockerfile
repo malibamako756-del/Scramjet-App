@@ -1,18 +1,18 @@
-# STAGE 1: Build the Scramjet Frontend
+# STAGE 1: Build the Frontend
 FROM node:20-alpine AS builder
 
-RUN apk add --no-cache git
+RUN apk add --no-cache git sed
 
 WORKDIR /app
 
-# 1. Clone the repo
+# 1. Clone and Install
 COPY . .
-
-# 2. Install dependencies
 RUN npm install -g pnpm && pnpm install
 
-# 3. Fix Vite Build Location
-# Move index.html to root so Vite finds it
+# 2. Reset Configuration (Ensure defaults)
+RUN find public src -type f -name "*.js" -exec sed -i 's|"/wisp/"|"/wisp/"|g' {} + || true
+
+# 3. Vite Fix
 RUN if [ -f "public/index.html" ]; then cp public/index.html .; fi
 
 # 4. Build
@@ -24,45 +24,51 @@ RUN if [ -d "dist" ]; then \
     elif [ -d "public" ]; then \
       mv public /app/final_site; \
     else \
-      mkdir /app/final_site && echo "<h1>Critical Error: No assets found</h1>" > /app/final_site/index.html; \
+      mkdir /app/final_site && echo "<h1>Error: Build Failed</h1>" > /app/final_site/index.html; \
     fi
 
-# STAGE 2: Python Backend with Custom Launcher
+# STAGE 2: Nginx + Python Wisp (Production)
 FROM python:3.11-slim
 
-RUN useradd -m -u 1000 scramjet
+# Install Nginx and Wisp
+RUN apt-get update && apt-get install -y nginx && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir wisp-python
+
 WORKDIR /app
 
-# Install Wisp Server and AIOHTTP (Required for the custom script)
-RUN pip install --no-cache-dir wisp-python aiohttp
+# Copy Frontend to Nginx Root
+COPY --from=builder /app/final_site /var/www/html
 
-# Copy the built frontend
-COPY --from=builder /app/final_site /app/client
+# --- CONFIGURE NGINX (The Traffic Splitter) ---
+# We use a heredoc to write the config cleanly. 
+# This configures Nginx to serve files on /, and proxy /wisp/ to Python.
+RUN echo 'events { worker_connections 1024; } \
+http { \
+    include       /etc/nginx/mime.types; \
+    default_type  application/octet-stream; \
+    server { \
+        listen 8080; \
+        root /var/www/html; \
+        index index.html; \
+        \
+        location / { \
+            try_files $uri $uri/ /index.html; \
+        } \
+        \
+        location /wisp/ { \
+            proxy_pass http://127.0.0.1:9000; \
+            proxy_http_version 1.1; \
+            proxy_set_header Upgrade $http_upgrade; \
+            proxy_set_header Connection "Upgrade"; \
+            proxy_set_header Host $host; \
+            proxy_set_header X-Real-IP $remote_addr; \
+        } \
+    } \
+}' > /etc/nginx/nginx.conf
 
-# --- CUSTOM LAUNCHER SCRIPT (run.py) ---
-# This script forces Wisp to listen on '/wisp/' and Static files on '/'
-# This solves the 404 error by separating the traffic programmatically.
-RUN echo "import logging" > run.py && \
-    echo "from aiohttp import web" >> run.py && \
-    echo "from wisp.server import WispServer" >> run.py && \
-    echo "logging.basicConfig(level=logging.INFO)" >> run.py && \
-    echo "" >> run.py && \
-    echo "# 1. Initialize Wisp Server" >> run.py && \
-    echo "server = WispServer()" >> run.py && \
-    echo "app = web.Application()" >> run.py && \
-    echo "" >> run.py && \
-    echo "# 2. Route WebSocket traffic to /wisp/" >> run.py && \
-    echo "app.router.add_route('*', '/wisp/', server.handle_request)" >> run.py && \
-    echo "" >> run.py && \
-    echo "# 3. Route Static Website to / (Root)" >> run.py && \
-    echo "app.router.add_static('/', path='/app/client', name='static', append_version=True)" >> run.py && \
-    echo "" >> run.py && \
-    echo "if __name__ == '__main__':" >> run.py && \
-    echo "    print('STARTING CUSTOM WISP SERVER ON PORT 8080')" >> run.py && \
-    echo "    web.run_app(app, host='0.0.0.0', port=8080)" >> run.py
-
-USER scramjet
+# Expose the port Traefik talks to
 EXPOSE 8080
 
-# Run our custom script instead of the module
-CMD ["python3", "run.py"]
+# --- START COMMAND ---
+# Start Python in background (port 9000), then start Nginx in foreground (port 8080)
+CMD ["sh", "-c", "python3 -m wisp.server --host 127.0.0.1 --port 9000 --limits --connections 50 --log-level info & nginx -g 'daemon off;'"]
