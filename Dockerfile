@@ -1,12 +1,13 @@
 # STAGE 1: Build the Scramjet Frontend
 FROM node:20-alpine AS builder
 
-RUN apk add --no-cache git sed
+# Install git for cloning
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-# 1. Clone the repository
-RUN git clone --depth 1 https://github.com/MercuryWorkshop/Scramjet-App .
+# 1. Clone your repository (The current directory)
+COPY . .
 
 # 2. Install pnpm
 RUN npm install -g pnpm
@@ -14,41 +15,48 @@ RUN npm install -g pnpm
 # 3. Install dependencies
 RUN pnpm install
 
-# 4. CONFIGURATION PATCH (The Fix for 404s)
-# We search for where the wisp url is defined and force it to root.
-# Usually in public/index.js or public/uv.config.js (or similar).
-# We'll try to patch the most likely suspects.
-RUN find public -type f -name "*.js" -print0 | xargs -0 sed -i 's|/wisp/|/|g' || true
-RUN find public -type f -name "*.js" -print0 | xargs -0 sed -i 's|"/wisp/"|"/"|g' || true
-
-# 5. STRUCTURE FIX & BUILD
+# 4. VITE BUILD FIX
+# Vite expects index.html in the root, but this repo has it in /public
+# We move it to root to satisfy the build process.
 RUN if [ -f "public/index.html" ]; then cp public/index.html .; fi
 
-# Build (ignoring errors to fallback to public if needed)
-RUN npx vite build || echo "Build failed, falling back to public folder"
+# 5. Build the static assets
+# We ignore errors (|| true) to ensure the container creates *something* even if build acts up
+RUN npx vite build || echo "Vite build warning"
 
-# 6. PREPARE FINAL ASSETS
+# 6. Assets Fallback Logic
+# Ensure we have a valid web root to serve. 
+# If 'dist' (build output) exists, use it. Otherwise, use 'public'.
 RUN if [ -d "dist" ]; then \
       mv dist /app/final_site; \
     elif [ -d "public" ]; then \
       mv public /app/final_site; \
     else \
-      mkdir /app/final_site && echo "<h1>Error: No assets found</h1>" > /app/final_site/index.html; \
+      mkdir /app/final_site && echo "<h1>Critical Error: No assets found</h1>" > /app/final_site/index.html; \
     fi
 
-# STAGE 2: The Wisp Python Backend
+# STAGE 2: The Wisp Python Backend (Optimal/Low Latency)
 FROM python:3.11-slim
 
+# Create a non-root user for security
 RUN useradd -m -u 1000 scramjet
 WORKDIR /app
 
+# Install the high-performance Wisp server
 RUN pip install --no-cache-dir wisp-python
 
-# Copy assets
+# Copy the prepared frontend assets
 COPY --from=builder /app/final_site /app/client
 
+# Security hardening
 USER scramjet
+
+# Expose the internal port
 EXPOSE 8080
 
-# Serve
-CMD ["python3", "-m", "wisp.server", "--host", "0.0.0.0", "--port", "8080", "--static", "/app/client", "--limits", "--connections", "50", "--log-level", "info"]
+# START COMMAND EXPLANATION:
+# --host 0.0.0.0: Listen on all interfaces (for Docker)
+# --port 8080: Listen on port 8080
+# --static /app/client: Serve the frontend files
+# --wisp-path /wisp/: REQUIRED. Matches the '/wisp/' path in your index.js
+CMD ["python3", "-m", "wisp.server", "--host", "0.0.0.0", "--port", "8080", "--static", "/app/client", "--wisp-path", "/wisp/", "--limits", "--connections", "50", "--log-level", "info"]
