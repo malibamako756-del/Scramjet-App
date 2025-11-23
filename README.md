@@ -94,6 +94,24 @@ The bundled Dockerfile and docker-compose.yml are production-ready for a Coolify
 - Override defaults via environment variables in Coolify: `WISP_DNS`, `DEFAULT_TRANSPORT`, `DEFAULT_SEARCH_TEMPLATE`, and `WISP_ALLOW_UDP_STREAMS` flow through to `/config.js`, `/healthz`, and the UI settings.
 - Use the built-in diagnostics: open the app, check the status pill, and run the connectivity test to validate `/healthz` and the WebSocket upgrade end to end.
 
+### Coolify troubleshooting (missing branch / clone failures)
+
+If Coolify fails the deploy before building the image with an error like:
+
+```
+fatal: Remote branch codex/deploy-production-ready-web-proxy-on-vps not found in upstream origin
+```
+
+pick the right branch in Coolify’s **Source / Git** settings:
+
+1. Edit the application in Coolify → **Source** → **Git**.
+2. Set **Branch** to `main` (or the branch that actually exists in your repo) instead of any temporary PR branch such as `codex/...`.
+3. Save and redeploy. Coolify will clone the right ref and continue with the build.
+
+If you need to deploy a feature branch, push it to the origin first and select that branch explicitly—Coolify cannot pull branches that don’t exist upstream.
+
+> Branch hygiene tip: if you delete feature branches after merging (recommended), always point Coolify back to `main` before the next deploy so it never tries to pull a branch that no longer exists.
+
 ### HTTP Transport
 
 The example uses [EpoxyTransport](https://github.com/MercuryWorkshop/EpoxyTransport) to fetch proxied data encrypted.

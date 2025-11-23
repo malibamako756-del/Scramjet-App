@@ -93,16 +93,6 @@ function attachEvents() {
         connectionTestButton?.addEventListener("click", () => runConnectivityCheck());
 }
 
-settingsToggle?.addEventListener("click", () => {
-        const hidden = settingsCard.hidden;
-        settingsCard.hidden = !hidden;
-});
-
-wispPathInput?.addEventListener("change", () => updateSetting("wispPath", normalizePath(wispPathInput.value)));
-searchTemplateInput?.addEventListener("change", () => updateSetting("searchTemplate", searchTemplateInput.value));
-transportSelect?.addEventListener("change", () => updateSetting("transport", transportSelect.value));
-connectionTestButton?.addEventListener("click", () => runConnectivityCheck());
-
 form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
