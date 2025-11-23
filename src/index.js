@@ -84,9 +84,9 @@ fastify.register(fastifyStatic, {
 	decorateReply: false,
 });
 
-fastify.setNotFoundHandler((res, reply) => {
-	return reply.code(404).type('text/html').sendFile('404.html');
-})
+fastify.setNotFoundHandler((_request, reply) => {
+        return reply.code(404).type("text/html").sendFile("404.html");
+});
 
 fastify.server.on("listening", () => {
 	const address = fastify.server.address();
@@ -169,7 +169,12 @@ let port = parseInt(process.env.PORT || "");
 
 if (isNaN(port)) port = 8080;
 
-fastify.listen({
-        port: port,
-        host: "0.0.0.0",
-});
+fastify
+        .listen({
+                port,
+                host: "0.0.0.0",
+        })
+        .catch((err) => {
+                console.error("Failed to start server", err);
+                process.exit(1);
+        });
