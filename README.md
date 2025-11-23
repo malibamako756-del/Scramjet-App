@@ -61,6 +61,57 @@ Resources for self-hosting:
 - https://docs.titaniumnetwork.org/guides/vps-hosting/
 - https://docs.titaniumnetwork.org/guides/dns-setup/
 
+## Resolving merge conflicts
+
+If GitHub reports conflicts on `public/index.css`, `public/index.html`, or `public/index.js` when you open a PR:
+
+1. Rebase your branch onto the latest `main` (or your deployment branch):
+   ```sh
+   git fetch origin
+   git checkout work
+   git rebase origin/main
+   ```
+2. When prompted, pick the versions from this branch (they include the latest diagnostics and settings fixes):
+   ```sh
+   git checkout --theirs public/index.css public/index.html public/index.js
+   git add public/index.css public/index.html public/index.js
+   git rebase --continue
+   ```
+3. Verify the build quickly:
+   ```sh
+   pnpm lint
+   ```
+4. Push the rebased branch and reopen the pull request.
+
+If you need the other side’s changes instead, swap `--theirs` for `--ours` in step 2 and re-apply any desired diagnostics/settings tweaks afterward.
+
+## Coolify / Traefik deployment quickstart
+
+The bundled Dockerfile and docker-compose.yml are production-ready for a Coolify v4 host using Traefik for TLS. To avoid the routing conflicts we hit earlier, keep the client and server on the same Wisp path and let Traefik own the public ports:
+
+- Build the container from this repo (Dockerfile) and run the compose service without a `ports:` block; Traefik will forward the domain to port `8080` internally.
+- Leave `WISP_PATH` set to `/wisp/` unless you also update the Fastify/Wisp server; the client upgrades **only** on that normalized path.
+- Override defaults via environment variables in Coolify: `WISP_DNS`, `DEFAULT_TRANSPORT`, `DEFAULT_SEARCH_TEMPLATE`, and `WISP_ALLOW_UDP_STREAMS` flow through to `/config.js`, `/healthz`, and the UI settings.
+- Use the built-in diagnostics: open the app, check the status pill, and run the connectivity test to validate `/healthz` and the WebSocket upgrade end to end.
+
+### Coolify troubleshooting (missing branch / clone failures)
+
+If Coolify fails the deploy before building the image with an error like:
+
+```
+fatal: Remote branch codex/deploy-production-ready-web-proxy-on-vps not found in upstream origin
+```
+
+pick the right branch in Coolify’s **Source / Git** settings:
+
+1. Edit the application in Coolify → **Source** → **Git**.
+2. Set **Branch** to `main` (or the branch that actually exists in your repo) instead of any temporary PR branch such as `codex/...`.
+3. Save and redeploy. Coolify will clone the right ref and continue with the build.
+
+If you need to deploy a feature branch, push it to the origin first and select that branch explicitly—Coolify cannot pull branches that don’t exist upstream.
+
+> Branch hygiene tip: if you delete feature branches after merging (recommended), always point Coolify back to `main` before the next deploy so it never tries to pull a branch that no longer exists.
+
 ### HTTP Transport
 
 The example uses [EpoxyTransport](https://github.com/MercuryWorkshop/EpoxyTransport) to fetch proxied data encrypted.

@@ -6,16 +6,17 @@
 			name="viewport"
 			content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
 		/>
-		<title>Scramjet</title>
+                <title>Scramjet</title>
 
-		<link rel="shortcut icon" content="favicon.webp" />
+                <link rel="shortcut icon" content="favicon.webp" />
 
-		<link rel="stylesheet" href="index.css" />
-		<script src="/scram/scramjet.all.js"></script>
-		<script src="baremux/index.js" defer></script>
-		<script src="epoxy/index.js" defer></script>
-		<script src="register-sw.js" defer></script>
-		<script src="search.js" defer></script>
+                <link rel="stylesheet" href="index.css" />
+                <script src="config.js"></script>
+                <script src="/scram/scramjet.all.js"></script>
+                <script src="baremux/index.js" defer></script>
+                <script src="epoxy/index.js" defer></script>
+                <script src="register-sw.js" defer></script>
+                <script src="search.js" defer></script>
 		<script src="index.js" defer></script>
 	</head>
 
@@ -42,15 +43,74 @@
 			/>
 			<input id="sj-address" type="text" placeholder="Search the web freely" />
 		</form>
-		<div class="desc left-margin">
-			<p id="sj-error"></p>
-			<pre id="sj-error-code"></pre>
-		</div>
-		<footer>
-			<div>
-				<a
-					title="The Mercury Workshop GitHub organization"
-					href="https://github.com/MercuryWorkshop"
+                <div class="desc left-margin">
+                        <p id="sj-error"></p>
+                        <pre id="sj-error-code"></pre>
+                </div>
+                <section class="settings">
+                        <div class="settings-header">
+                                <div class="settings-title">
+                                        <h2>Connection settings</h2>
+                                        <p class="settings-subtitle">
+                                                Tune how the proxy connects (path, transport, search) and verify reachability with
+                                                live health and latency checks. Settings save locally in your browser.
+                                        </p>
+                                        <p id="sj-connection-details" class="status-details">
+                                                Diagnostics have not run yet.
+                                        </p>
+                                </div>
+                                <div class="settings-actions">
+                                        <span
+                                                id="sj-connection-status"
+                                                class="status-pill status-idle"
+                                                title="Live proxy reachability and WebSocket latency"
+                                                >Idle</span
+                                        >
+                                        <button id="sj-settings-toggle" type="button" aria-controls="sj-settings">
+                                                Hide panel
+                                        </button>
+                                </div>
+                        </div>
+                        <div id="sj-settings" class="settings-card">
+                                <label class="settings-field">
+                                        <span>Wisp path</span>
+                                        <input id="sj-wisp-path" type="text" spellcheck="false" />
+                                </label>
+                                <label class="settings-field">
+                                        <span>Default search</span>
+                                        <input
+                                                id="sj-search-template"
+                                                type="text"
+                                                spellcheck="false"
+                                                placeholder="https://www.google.com/search?q=%s"
+                                        />
+                                </label>
+                                <label class="settings-field">
+                                        <span>Transport</span>
+                                        <select id="sj-transport"></select>
+                                </label>
+                                <div class="connection-diagnostics">
+                                        <div class="connection-status">
+                                                <strong>Diagnostics</strong>
+                                                <p>
+                                                        Runs health and WebSocket probes against the configured path so you can confirm the
+                                                        server is reachable from this device.
+                                                </p>
+                                        </div>
+                                        <button id="sj-connection-test" type="button">Test connectivity</button>
+                                </div>
+                                <p class="settings-hint">
+                                        The health probe pings <code>/healthz</code> and opens/closes a WebSocket on the
+                                        configured path. Reported latencies are client-side so you can compare transports or
+                                        paths and troubleshoot when connectivity fails.
+                                </p>
+                        </div>
+                </section>
+                <footer>
+                        <div>
+                                <a
+                                        title="The Mercury Workshop GitHub organization"
+                                        href="https://github.com/MercuryWorkshop"
 					>Mercury Workshop</a
 				>
 				<a
