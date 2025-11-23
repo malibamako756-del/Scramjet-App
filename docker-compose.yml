@@ -1,12 +1,24 @@
-# TODO: needs to be updated for sj
-# services:
-#   ultraviolet:
-#     image: diffusehyperion/ultraviolet
-#     container_name: scramjet
-#     restart: unless-stopped
-#     ports:
-#       - "8080:8080"
+services:
+  scramjet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scramjet-wisp
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1024M
+    environment:
+      - LOG_LEVEL=info
+    networks:
+      - coolify
 
-# networks:
-#   default:
-#     name: ultraviolet
+networks:
+  coolify:
+    external: true
