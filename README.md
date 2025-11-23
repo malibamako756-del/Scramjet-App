@@ -61,6 +61,15 @@ Resources for self-hosting:
 - https://docs.titaniumnetwork.org/guides/vps-hosting/
 - https://docs.titaniumnetwork.org/guides/dns-setup/
 
+## Coolify / Traefik deployment quickstart
+
+The bundled Dockerfile and docker-compose.yml are production-ready for a Coolify v4 host using Traefik for TLS. To avoid the routing conflicts we hit earlier, keep the client and server on the same Wisp path and let Traefik own the public ports:
+
+- Build the container from this repo (Dockerfile) and run the compose service without a `ports:` block; Traefik will forward the domain to port `8080` internally.
+- Leave `WISP_PATH` set to `/wisp/` unless you also update the Fastify/Wisp server; the client upgrades **only** on that normalized path.
+- Override defaults via environment variables in Coolify: `WISP_DNS`, `DEFAULT_TRANSPORT`, `DEFAULT_SEARCH_TEMPLATE`, and `WISP_ALLOW_UDP_STREAMS` flow through to `/config.js`, `/healthz`, and the UI settings.
+- Use the built-in diagnostics: open the app, check the status pill, and run the connectivity test to validate `/healthz` and the WebSocket upgrade end to end.
+
 ### HTTP Transport
 
 The example uses [EpoxyTransport](https://github.com/MercuryWorkshop/EpoxyTransport) to fetch proxied data encrypted.

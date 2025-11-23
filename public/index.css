@@ -88,7 +88,169 @@ footer a {
 }
 
 footer a:hover {
-	text-decoration: underline;
+        text-decoration: underline;
+}
+
+.settings {
+        margin: 24px 16px 0 16px;
+        color: #f0f0f0;
+}
+
+.settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+}
+
+.settings-title {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+}
+
+.settings-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+}
+
+.settings-subtitle {
+        margin: 8px 0 0 0;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 14px;
+        line-height: 1.4;
+}
+
+.settings-header h2 {
+        margin: 0;
+        font-weight: 500;
+}
+
+.settings-header button {
+        background: #1f75fe;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-weight: 600;
+        cursor: pointer;
+}
+
+.settings-header button:hover {
+        background: #1a66da;
+}
+
+.settings-card {
+        margin-top: 12px;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+}
+
+.settings-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 15px;
+}
+
+.settings-field input,
+.settings-field select {
+        background: #0c0c0c;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #fff;
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-family: inherit;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.35);
+}
+
+.settings-hint {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 13px;
+        line-height: 1.4;
+}
+
+.connection-diagnostics {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+}
+
+.connection-diagnostics button {
+        background: #1f75fe;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-weight: 600;
+        cursor: pointer;
+}
+
+.connection-diagnostics button:hover {
+        background: #1a66da;
+}
+
+.status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        min-width: 96px;
+}
+
+.status-idle {
+        background: rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.75);
+}
+
+.status-checking {
+        background: #1c2740;
+        color: #f0f4ff;
+}
+
+.status-warn {
+        background: #3b3562;
+        color: #e0e7ff;
+}
+
+.status-ok {
+        background: #14532d;
+        color: #dcfce7;
+}
+
+.status-error {
+        background: #3f1d2e;
+        color: #fecdd3;
+}
+
+.status-details {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        margin: 6px 0 0 0;
+}
+
+#sj-connection-test:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
 }
 
 .desc p {
