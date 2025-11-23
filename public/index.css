@@ -99,8 +99,28 @@ footer a:hover {
 .settings-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
+        flex-wrap: wrap;
+}
+
+.settings-title {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+}
+
+.settings-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+}
+
+.settings-subtitle {
+        margin: 8px 0 0 0;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 14px;
+        line-height: 1.4;
 }
 
 .settings-header h2 {
@@ -207,6 +227,11 @@ footer a:hover {
         color: #f0f4ff;
 }
 
+.status-warn {
+        background: #3b3562;
+        color: #e0e7ff;
+}
+
 .status-ok {
         background: #14532d;
         color: #dcfce7;
@@ -220,7 +245,12 @@ footer a:hover {
 .status-details {
         color: rgba(255, 255, 255, 0.7);
         font-size: 14px;
-        margin-left: 10px;
+        margin: 6px 0 0 0;
+}
+
+#sj-connection-test:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
 }
 
 .desc p {

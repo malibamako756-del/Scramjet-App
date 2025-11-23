@@ -49,10 +49,29 @@
                 </div>
                 <section class="settings">
                         <div class="settings-header">
-                                <h2>Connection settings</h2>
-                                <button id="sj-settings-toggle" type="button">Toggle</button>
+                                <div class="settings-title">
+                                        <h2>Connection settings</h2>
+                                        <p class="settings-subtitle">
+                                                Tune how the proxy connects (path, transport, search) and verify reachability with
+                                                live health and latency checks. Settings save locally in your browser.
+                                        </p>
+                                        <p id="sj-connection-details" class="status-details">
+                                                Diagnostics have not run yet.
+                                        </p>
+                                </div>
+                                <div class="settings-actions">
+                                        <span
+                                                id="sj-connection-status"
+                                                class="status-pill status-idle"
+                                                title="Live proxy reachability and WebSocket latency"
+                                                >Idle</span
+                                        >
+                                        <button id="sj-settings-toggle" type="button" aria-controls="sj-settings">
+                                                Hide panel
+                                        </button>
+                                </div>
                         </div>
-                        <div id="sj-settings" class="settings-card" hidden>
+                        <div id="sj-settings" class="settings-card">
                                 <label class="settings-field">
                                         <span>Wisp path</span>
                                         <input id="sj-wisp-path" type="text" spellcheck="false" />
@@ -72,15 +91,18 @@
                                 </label>
                                 <div class="connection-diagnostics">
                                         <div class="connection-status">
-                                                <span id="sj-connection-status" class="status-pill status-idle">Idle</span>
-                                                <span id="sj-connection-details" class="status-details">No checks run yet.</span>
+                                                <strong>Diagnostics</strong>
+                                                <p>
+                                                        Runs health and WebSocket probes against the configured path so you can confirm the
+                                                        server is reachable from this device.
+                                                </p>
                                         </div>
                                         <button id="sj-connection-test" type="button">Test connectivity</button>
                                 </div>
                                 <p class="settings-hint">
-                                        Settings are saved locally in your browser and seeded from server defaults
-                                        so you can tweak performance without rebuilding the image. Run a connectivity
-                                        test after changing paths to confirm the server is reachable from this device.
+                                        The health probe pings <code>/healthz</code> and opens/closes a WebSocket on the
+                                        configured path. Reported latencies are client-side so you can compare transports or
+                                        paths and troubleshoot when connectivity fails.
                                 </p>
                         </div>
                 </section>
