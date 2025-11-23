@@ -5,17 +5,24 @@ services:
       dockerfile: Dockerfile
     container_name: scramjet-wisp
     restart: unless-stopped
+    
+    # Hardening
     cap_drop:
       - ALL
     security_opt:
       - no-new-privileges:true
+    
+    # Resources
     deploy:
       resources:
         limits:
           cpus: '1.5'
           memory: 1024M
+    
     environment:
       - LOG_LEVEL=info
+
+    # No 'ports:' section here. Coolify handles the routing.
     networks:
       - coolify
 
