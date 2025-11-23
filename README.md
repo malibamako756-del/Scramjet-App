@@ -61,6 +61,30 @@ Resources for self-hosting:
 - https://docs.titaniumnetwork.org/guides/vps-hosting/
 - https://docs.titaniumnetwork.org/guides/dns-setup/
 
+## Resolving merge conflicts
+
+If GitHub reports conflicts on `public/index.css`, `public/index.html`, or `public/index.js` when you open a PR:
+
+1. Rebase your branch onto the latest `main` (or your deployment branch):
+   ```sh
+   git fetch origin
+   git checkout work
+   git rebase origin/main
+   ```
+2. When prompted, pick the versions from this branch (they include the latest diagnostics and settings fixes):
+   ```sh
+   git checkout --theirs public/index.css public/index.html public/index.js
+   git add public/index.css public/index.html public/index.js
+   git rebase --continue
+   ```
+3. Verify the build quickly:
+   ```sh
+   pnpm lint
+   ```
+4. Push the rebased branch and reopen the pull request.
+
+If you need the other side’s changes instead, swap `--theirs` for `--ours` in step 2 and re-apply any desired diagnostics/settings tweaks afterward.
+
 ## Coolify / Traefik deployment quickstart
 
 The bundled Dockerfile and docker-compose.yml are production-ready for a Coolify v4 host using Traefik for TLS. To avoid the routing conflicts we hit earlier, keep the client and server on the same Wisp path and let Traefik own the public ports:
